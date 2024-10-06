@@ -30,6 +30,15 @@ camera.position.z = 0.1;
 
 const stars = [];
 
+const menu = document.createElement('div');
+menu.id = 'menu';
+menu.innerHTML = `
+<h3>Constellations</h3>
+<ul>
+</ul>
+`;
+document.body.appendChild(menu);
+
 // Load stars from the URL
 const loadingDisplay = document.createElement('div');
 loadingDisplay.id = 'loading-display';
@@ -54,7 +63,18 @@ fetch(planetsURL.earth)
 
 
 const constellations = [];
-constellations.push(new Constellation(0, 'Constellation'));
+constellations.push(new Constellation(0, 'Sem nome'));
+
+function updateMenu() {
+    const menuList = menu.querySelector('ul');
+    menuList.innerHTML = '';
+    constellations.forEach(constellation => {
+        const constellationItem = document.createElement('li');
+        constellationItem.textContent = constellation.name;
+        menuList.appendChild(constellationItem);
+    });
+}
+updateMenu();
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -139,13 +159,14 @@ starClick.addListener(sprite => {
 
 const onMove = (event) => {
     // Normalize mouse coordinates (-1 to +1) for both X and Y axis
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    const intersects = raycaster.intersectObjects(scene.children);
+    const rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
     // Update the raycaster to find the point where the mouse is pointing in the 3D world
     raycaster.setFromCamera(mouse, camera);
+
+    const intersects = raycaster.intersectObjects(scene.children);
 
     // Reset cursor
     document.body.style.cursor = 'auto';
@@ -218,3 +239,11 @@ controlBox.innerHTML = `
     <p>Use these controls to interact with the star map.</p>
 `;
 document.body.appendChild(controlBox);
+
+
+// Menu toggle logic
+const menuButton = document.getElementById('menu-button');
+menuButton.addEventListener('click', () => {
+    menu.classList.toggle('show');
+});
+

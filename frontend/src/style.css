@@ -4,6 +4,8 @@ html, body {
 
 body {
     overflow: hidden;
+    color: white;
+    font-family: Arial, sans-serif;
 }
 
 #loading-display {
@@ -11,8 +13,6 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: white;
-    font-family: Arial, sans-serif;
     font-size: 64px;
     text-align: center;
 }
@@ -24,8 +24,6 @@ body {
     background-color: rgba(0, 0, 0, 0.7);
     padding: 15px;
     border-radius: 8px;
-    color: white;
-    font-family: Arial, sans-serif;
     font-size: 14px;
     max-width: 250px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
@@ -49,3 +47,43 @@ body {
     margin-top: 10px;
 }
 
+#menu-button {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 10px;
+    font-size: 16px;
+    background-color: #333;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+
+#menu {
+    position: absolute;
+    top: 60px;
+    left: 0; /* Menu is aligned to the left */
+    min-width: 200px;
+    max-width: 1000px;
+    color: white;
+    background-color: #1A1A1A;
+    border: 1px solid #ccc;
+    padding: 0px;
+    transform: translateX(-1010px); /* Initially hidden (shifted left) */
+    transition: transform 0.5s ease; /* Animate the transform property */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#menu.show {
+    transform: translateX(0);
+}
+
+/* #menu ul {
+    list-style-type: none;
+    padding: 0;
+} */
+
+#menu ul li {
+    margin: 10px 0;
+}
