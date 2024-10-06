@@ -39,7 +39,7 @@ export class StarClick {
 
         for (let i = 0; i < intersects.length; i++) {
             const clickedSprite = intersects[i].object;
-            if (clickedSprite.name !== 'star')
+            if (clickedSprite.type !== 'star')
                 continue;
 
             console.log('Clicked:', clickedSprite);

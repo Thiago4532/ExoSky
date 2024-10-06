@@ -1,4 +1,4 @@
-export const brightStars = [
+export const brightStarsData = [
   {
     "ra": 331.44606406642515,
     "dec": -0.3198973999999683,

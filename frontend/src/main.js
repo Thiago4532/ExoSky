@@ -2,11 +2,10 @@ import './style.css';
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { StarClick } from './star-click';
 
-import { sampleStars } from '../data/sample-stars';
-import { brightStars } from '../data/bright-stars';
-import { createStarSprite } from './star-sprite.js';
+import { brightStarsData } from '../data/bright-stars';
+import { StarClick } from './star-click';
+import { Star } from './star';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
@@ -28,9 +27,12 @@ camera.position.x = 0;
 camera.position.y = 0;
 camera.position.z = 0.1;
 
-// const sprites = sampleStars.map(star => createStarSprite(star));
-const sprites = brightStars.map(star => createStarSprite(star));
-sprites.forEach(sprite => scene.add(sprite));
+const stars = [];
+for (let i = 0; i < brightStarsData.length; ++i) {
+    const star = new Star(i, brightStarsData[i]);
+    scene.add(star.sprite);
+    stars.push(star);
+}
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -101,7 +103,7 @@ const raycaster = new THREE.Raycaster(); // Raycaster to project 2D mouse into 3
 
 starClick.addListener(sprite => { 
     if (lastSprite !== null) {
-        lastSprite.material.color.set(sprite.originalColor);
+        lastSprite.material.color.set(stars[sprite.starId].color);
 
         const lineMaterial = new THREE.LineBasicMaterial({ color: lineColor });
         const points = [
@@ -136,7 +138,7 @@ const onMove = (event) => {
 
     // Check if the sprite is intersected
     for (let i = 0; i < intersects.length; i++) {
-        if (intersects[i].object.name === 'star') {
+        if (intersects[i].object.type === 'star') {
             document.body.style.cursor = 'pointer'; // Change cursor to pointer
             break;
         }
