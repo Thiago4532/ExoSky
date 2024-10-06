@@ -37,6 +37,8 @@ loadingDisplay.textContent = 'Loading...';
 loadingDisplay.style.display = 'block';
 document.body.appendChild(loadingDisplay);
 
+let constellationController = null;
+
 // TODO: Error handling
 fetch(planetsURL.earth)
     .then(response => {
@@ -46,14 +48,12 @@ fetch(planetsURL.earth)
         stars.push(...starsJSON.map((star, index) => new Star(index, star)));
         stars.forEach(star => scene.add(star.sprite));
         loadingDisplay.style.display = 'none';
+        constellationController = new ConstellationController(stars.length);
     })
     .catch(error => {
         console.error('Error loading stars:', error);
         loadingDisplay.textContent = 'Error loading stars';
     });
-
-
-const constellationController = new ConstellationController();
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
