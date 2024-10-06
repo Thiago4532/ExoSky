@@ -121,15 +121,28 @@ starClick.addListener(sprite => {
     lastSprite = sprite;
 });
 
-renderer.domElement.addEventListener('mousemove', (event) => {
+const onMove = (event) => {
     // Normalize mouse coordinates (-1 to +1) for both X and Y axis
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-    if (lastSprite !== null) {
-        // Update the raycaster to find the point where the mouse is pointing in the 3D world
-        raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(scene.children);
 
+    // Update the raycaster to find the point where the mouse is pointing in the 3D world
+    raycaster.setFromCamera(mouse, camera);
+
+    // Reset cursor
+    document.body.style.cursor = 'auto';
+
+    // Check if the sprite is intersected
+    for (let i = 0; i < intersects.length; i++) {
+        if (intersects[i].object.name === 'star') {
+            document.body.style.cursor = 'pointer'; // Change cursor to pointer
+            break;
+        }
+    }
+
+    if (lastSprite !== null) {
         // Get the point in the direction of the ray (arbitrary distance)
         const intersectPoint = raycaster.ray.origin.clone().add(raycaster.ray.direction.clone().multiplyScalar(10));
 
@@ -151,7 +164,10 @@ renderer.domElement.addEventListener('mousemove', (event) => {
             currentLine = null;
         }
     }
-});
+}
+
+renderer.domElement.addEventListener('mousemove', onMove);
+renderer.domElement.addEventListener('wheel', onMove);
 
 // Cancel on mouse right-click
 renderer.domElement.addEventListener('contextmenu', (event) => {
