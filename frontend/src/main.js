@@ -54,7 +54,7 @@ fetch(planetsURL.earth)
 
 
 const constellations = [];
-constellations.push(new Constellation());
+constellations.push(new Constellation(0, 'Constellation'));
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
