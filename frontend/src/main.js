@@ -4,10 +4,9 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { StarClick } from './star-click';
 import { planetsURL } from './planets';
-import { brightStarsData } from '../data/bright-stars';
 import { Star } from './star';
 import { ConstellationController } from './constellation-controller';
-import { constellationFirstStar } from './constellation-service';
+import { ConstellationsMenu } from './constellations-menu'
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
@@ -31,15 +30,6 @@ camera.position.z = 0.1;
 
 const stars = [];
 
-const menu = document.createElement('div');
-menu.id = 'menu';
-menu.innerHTML = `
-<h3>Constellations</h3>
-<ul>
-</ul>
-`;
-document.body.appendChild(menu);
-
 // Load stars from the URL
 const loadingDisplay = document.createElement('div');
 loadingDisplay.id = 'loading-display';
@@ -48,6 +38,7 @@ loadingDisplay.style.display = 'block';
 document.body.appendChild(loadingDisplay);
 
 let constellationController = null;
+let constellationsMenu = null;
 
 // TODO: Error handling
 fetch(planetsURL.earth)
@@ -59,35 +50,12 @@ fetch(planetsURL.earth)
         stars.forEach(star => scene.add(star.sprite));
         loadingDisplay.style.display = 'none';
         constellationController = new ConstellationController(stars.length);
+        constellationsMenu = new ConstellationsMenu(constellationController, stars, camera);
     })
     .catch(error => {
         console.error('Error loading stars:', error);
         loadingDisplay.textContent = 'Error loading stars';
     });
-
-const lookAt = (camera, position) => {
-    const {x, y, z} = position;
-    const dist = x * x + y * y + z * z * -10;
-    camera.position.set(x / dist, y / dist, z / dist);
-}
-
-function updateMenu() {
-    const menuList = menu.querySelector('ul');
-    menuList.innerHTML = '';
-    constellationController.constellations.forEach((constellation) => {
-        if (constellation !== null) {
-            const constellationItem = document.createElement('li');
-            constellationItem.textContent = constellation.name;
-            constellationItem.style.cursor = 'pointer';
-            constellationItem.addEventListener('click', (event) => {
-                const starId = constellationFirstStar(constellation);
-                const { sprite } = stars[starId];
-                lookAt(camera, sprite.position);
-            });
-            menuList.appendChild(constellationItem);
-        }
-    });
-}
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -157,7 +125,7 @@ starClick.addListener(sprite => {
         const line = new THREE.Line(lineGeometry, lineMaterial);
         scene.add(line);
         constellationController.addEdge(lastSprite.starId, sprite.starId);
-        updateMenu();
+        constellationsMenu.update();
 
         if (currentLine) {
             scene.remove(currentLine);
@@ -251,10 +219,3 @@ controlBox.innerHTML = `
     <p>Use these controls to interact with the star map.</p>
 `;
 document.body.appendChild(controlBox);
-
-// Menu toggle logic
-const menuButton = document.getElementById('menu-button');
-menuButton.addEventListener('click', () => {
-    menu.classList.toggle('show');
-});
-
