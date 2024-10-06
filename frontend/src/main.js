@@ -43,11 +43,35 @@ window.addEventListener('resize', onWindowResize);
 const minFov = 1;
 const maxFov = 120;
 
+const fovDisplay = document.createElement('div');
+fovDisplay.id = 'fov-display';
+fovDisplay.style.position = 'absolute';
+fovDisplay.style.top = '10px';
+fovDisplay.style.left = '10px';
+fovDisplay.style.color = 'white';
+fovDisplay.style.fontFamily = 'Arial, sans-serif';
+fovDisplay.style.fontSize = '14px';
+document.body.appendChild(fovDisplay);
+
+function updateFOVDisplay() {
+    fovDisplay.textContent = `FOV: ${camera.fov.toFixed(2)}°`;
+}
+updateFOVDisplay();
+
 function onMouseWheel(event) {
-    let fov = camera.fov + event.deltaY * 0.05;
+    let fov = camera.fov;
+    // Apply a scaling factor that reduces changes when FOV is small
+    let scale = Math.max(0.1, fov / maxFov); // Scale the delta by the current FOV
+    fov += event.deltaY * 0.05 * scale;
+    
+    // Clamp the FOV to the specified min and max limits
     fov = Math.min(maxFov, Math.max(minFov, fov));
+
     camera.fov = fov;
     camera.updateProjectionMatrix();
+
+    // Update FOV display
+    updateFOVDisplay();
 }
 
 document.addEventListener('wheel', onMouseWheel);
@@ -76,7 +100,8 @@ document.addEventListener('keydown', handleKeyPress);
 
 const starClick = new StarClick(renderer.domElement, camera, scene);
 
-let line = null;
+let currentLine = null;
+const lineColor = 0xd8cfff;
 const mouse = new THREE.Vector2(); // Store 2D mouse position
 const raycaster = new THREE.Raycaster(); // Raycaster to project 2D mouse into 3D space
 
@@ -84,7 +109,7 @@ starClick.addListener(sprite => {
     if (lastSprite !== null) {
         lastSprite.material.color.set(sprite.originalColor);
 
-        const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffff00 });
+        const lineMaterial = new THREE.LineBasicMaterial({ color: lineColor });
         const points = [
             new THREE.Vector3(lastSprite.position.x, lastSprite.position.y, lastSprite.position.z),
             new THREE.Vector3(sprite.position.x, sprite.position.y, sprite.position.z)
@@ -92,6 +117,11 @@ starClick.addListener(sprite => {
         const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
         const line = new THREE.Line(lineGeometry, lineMaterial);
         scene.add(line);
+
+        if (currentLine) {
+            scene.remove(currentLine);
+            currentLine = null;
+        }
     }
     sprite.material.color.set(0xff0000);
     lastSprite = sprite;
@@ -110,21 +140,21 @@ renderer.domElement.addEventListener('mousemove', (event) => {
         const intersectPoint = raycaster.ray.origin.clone().add(raycaster.ray.direction.clone().multiplyScalar(10));
 
         // Create or update the line
-        if (!line) {
+        if (!currentLine) {
             const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffff00 });
             const points = [lastSprite.position.clone(), intersectPoint];
             const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
-            line = new THREE.Line(lineGeometry, lineMaterial);
-            scene.add(line);
+            currentLine = new THREE.Line(lineGeometry, lineMaterial);
+            scene.add(currentLine);
         } else {
             // Update the points of the existing line
             const points = [lastSprite.position.clone(), intersectPoint];
-            line.geometry.setFromPoints(points);
+            currentLine.geometry.setFromPoints(points);
         }
     } else {
-        if (line) {
-            scene.remove(line);
-            line = null;
+        if (currentLine) {
+            scene.remove(currentLine);
+            currentLine = null;
         }
     }
 });
@@ -135,9 +165,9 @@ renderer.domElement.addEventListener('contextmenu', (event) => {
         lastSprite.material.color.set(0xffffff);
         lastSprite = null;
     }
-    if (line) {
-        scene.remove(line);
-        line = null;
+    if (currentLine) {
+        scene.remove(currentLine);
+        currentLine = null;
     }
 });
 

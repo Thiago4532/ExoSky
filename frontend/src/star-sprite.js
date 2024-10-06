@@ -4,7 +4,7 @@ import {raToDeg, decToDeg, sphericalToCartesian, magnitudeToSize} from './calc.j
 export const createStarSprite = (starData) => {
     const {x, y, z} = starData;
 
-    const geometry = new THREE.SphereGeometry(1, 16, 16);
+    const geometry = new THREE.SphereGeometry(1, 32, 32);
     const material = new THREE.MeshBasicMaterial({ color: starData.color });
     const starSphere = new THREE.Mesh(geometry, material);
 
