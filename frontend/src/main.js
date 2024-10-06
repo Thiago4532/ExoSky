@@ -64,20 +64,18 @@ fetch(planetsURL.earth)
         loadingDisplay.textContent = 'Error loading stars';
     });
 
-// MERGE
-// const constellations = [];
-// constellations.push(new Constellation(0, 'Sem nome'));
-
-// function updateMenu() {
-//     const menuList = menu.querySelector('ul');
-//     menuList.innerHTML = '';
-//     constellations.forEach(constellation => {
-//         const constellationItem = document.createElement('li');
-//         constellationItem.textContent = constellation.name;
-//         menuList.appendChild(constellationItem);
-//     });
-// }
-// updateMenu();
+function updateMenu() {
+    const menuList = menu.querySelector('ul');
+    menuList.innerHTML = '';
+    constellationController.constellations.forEach((constellation) => {
+        if (constellation !== null) {
+            const constellationItem = document.createElement('li');
+            constellationItem.textContent = constellation.name;
+            menuList.appendChild(constellationItem);
+        }
+    });
+}
+setInterval(updateMenu, 100);
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
