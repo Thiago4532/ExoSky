@@ -2,9 +2,9 @@ import './style.css';
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-
-import { brightStarsData } from '../data/bright-stars';
 import { StarClick } from './star-click';
+import { planetsURL } from './planets';
+import { brightStarsData } from '../data/bright-stars';
 import { Star } from './star';
 
 const scene = new THREE.Scene();
@@ -28,11 +28,28 @@ camera.position.y = 0;
 camera.position.z = 0.1;
 
 const stars = [];
-for (let i = 0; i < brightStarsData.length; ++i) {
-    const star = new Star(i, brightStarsData[i]);
-    scene.add(star.sprite);
-    stars.push(star);
-}
+
+// Load stars from the URL
+const loadingDisplay = document.createElement('div');
+loadingDisplay.id = 'loading-display';
+loadingDisplay.textContent = 'Loading...';
+loadingDisplay.style.display = 'block';
+document.body.appendChild(loadingDisplay);
+
+// TODO: Error handling
+fetch(planetsURL.earth)
+    .then(response => {
+        return response.json();
+    })
+    .then(starsJSON => {
+        stars.push(...starsJSON.map((star, index) => new Star(index, star)));
+        stars.forEach(star => scene.add(star.sprite));
+        loadingDisplay.style.display = 'none';
+    })
+    .catch(error => {
+        console.error('Error loading stars:', error);
+        loadingDisplay.textContent = 'Error loading stars';
+    });
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -44,15 +61,6 @@ window.addEventListener('resize', onWindowResize);
 
 const minFov = 1;
 const maxFov = 120;
-
-const fovDisplay = document.createElement('div');
-fovDisplay.id = 'fov-display';
-document.body.appendChild(fovDisplay);
-
-function updateFOVDisplay() {
-    fovDisplay.textContent = `FOV: ${camera.fov.toFixed(2)}°`;
-}
-updateFOVDisplay();
 
 function onMouseWheel(event) {
     let fov = camera.fov;
