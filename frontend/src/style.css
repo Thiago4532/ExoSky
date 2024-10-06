@@ -3,7 +3,7 @@ html, body {
 }
 
 body {
-    overflox: hidden;
+    overflow: hidden;
 }
 
 #fov-display {
