@@ -45,12 +45,6 @@ const maxFov = 120;
 
 const fovDisplay = document.createElement('div');
 fovDisplay.id = 'fov-display';
-fovDisplay.style.position = 'absolute';
-fovDisplay.style.top = '10px';
-fovDisplay.style.left = '10px';
-fovDisplay.style.color = 'white';
-fovDisplay.style.fontFamily = 'Arial, sans-serif';
-fovDisplay.style.fontSize = '14px';
 document.body.appendChild(fovDisplay);
 
 function updateFOVDisplay() {
@@ -123,7 +117,7 @@ starClick.addListener(sprite => {
             currentLine = null;
         }
     }
-    sprite.material.color.set(0xff0000);
+    sprite.material.color.set(0x00ff00);
     lastSprite = sprite;
 });
 
@@ -176,6 +170,19 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-document.body.style.overflow = 'hidden';
-
 animate();
+
+// Create a control box in the top-right corner
+const controlBox = document.createElement('div');
+controlBox.id = 'control-box';
+controlBox.innerHTML = `
+    <h3>Controls</h3>
+    <ul>
+        <li>Zoom: Scroll mouse wheel</li>
+        <li>Change FOV: Use mouse wheel</li>
+        <li>Draw Line: Click two stars</li>
+        <li>Cancel Line: Right-click</li>
+    </ul>
+    <p>Use these controls to interact with the star map.</p>
+`;
+document.body.appendChild(controlBox);
