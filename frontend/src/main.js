@@ -6,7 +6,7 @@ import { StarClick } from './star-click';
 import { planetsURL } from './planets';
 import { brightStarsData } from '../data/bright-stars';
 import { Star } from './star';
-import { Constellation } from './constellation';
+import { ConstellationController } from './constellation-controller';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
@@ -46,6 +46,8 @@ loadingDisplay.textContent = 'Loading...';
 loadingDisplay.style.display = 'block';
 document.body.appendChild(loadingDisplay);
 
+let constellationController = null;
+
 // TODO: Error handling
 fetch(planetsURL.earth)
     .then(response => {
@@ -55,26 +57,27 @@ fetch(planetsURL.earth)
         stars.push(...starsJSON.map((star, index) => new Star(index, star)));
         stars.forEach(star => scene.add(star.sprite));
         loadingDisplay.style.display = 'none';
+        constellationController = new ConstellationController(stars.length);
     })
     .catch(error => {
         console.error('Error loading stars:', error);
         loadingDisplay.textContent = 'Error loading stars';
     });
 
+// MERGE
+// const constellations = [];
+// constellations.push(new Constellation(0, 'Sem nome'));
 
-const constellations = [];
-constellations.push(new Constellation(0, 'Sem nome'));
-
-function updateMenu() {
-    const menuList = menu.querySelector('ul');
-    menuList.innerHTML = '';
-    constellations.forEach(constellation => {
-        const constellationItem = document.createElement('li');
-        constellationItem.textContent = constellation.name;
-        menuList.appendChild(constellationItem);
-    });
-}
-updateMenu();
+// function updateMenu() {
+//     const menuList = menu.querySelector('ul');
+//     menuList.innerHTML = '';
+//     constellations.forEach(constellation => {
+//         const constellationItem = document.createElement('li');
+//         constellationItem.textContent = constellation.name;
+//         menuList.appendChild(constellationItem);
+//     });
+// }
+// updateMenu();
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -146,7 +149,7 @@ starClick.addListener(sprite => {
         const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
         const line = new THREE.Line(lineGeometry, lineMaterial);
         scene.add(line);
-        constellations[0].addEdge(lastSprite.starId, sprite.starId);
+        constellationController.addEdge(lastSprite.starId, sprite.starId);
 
         if (currentLine) {
             scene.remove(currentLine);
@@ -239,7 +242,6 @@ controlBox.innerHTML = `
     <p>Use these controls to interact with the star map.</p>
 `;
 document.body.appendChild(controlBox);
-
 
 // Menu toggle logic
 const menuButton = document.getElementById('menu-button');
