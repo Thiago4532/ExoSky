@@ -6,7 +6,7 @@ import { StarClick } from './star-click';
 import { planetsURL } from './planets';
 import { brightStarsData } from '../data/bright-stars';
 import { Star } from './star';
-import { Constellation } from './constellation';
+import { ConstellationController } from './constellation-controller';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
@@ -53,8 +53,7 @@ fetch(planetsURL.earth)
     });
 
 
-const constellations = [];
-constellations.push(new Constellation(0, 'Constellation'));
+const constellationController = new ConstellationController();
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -126,7 +125,7 @@ starClick.addListener(sprite => {
         const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
         const line = new THREE.Line(lineGeometry, lineMaterial);
         scene.add(line);
-        constellations[0].addEdge(lastSprite.starId, sprite.starId);
+        constellationController.addEdge(lastSprite.starId, sprite.starId);
 
         if (currentLine) {
             scene.remove(currentLine);
