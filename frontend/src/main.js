@@ -7,6 +7,7 @@ import { planetsURL } from './planets';
 import { brightStarsData } from '../data/bright-stars';
 import { Star } from './star';
 import { ConstellationController } from './constellation-controller';
+import { constellationFirstStar } from './constellation-service';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
@@ -64,6 +65,12 @@ fetch(planetsURL.earth)
         loadingDisplay.textContent = 'Error loading stars';
     });
 
+const lookAt = (camera, position) => {
+    const {x, y, z} = position;
+    const dist = x * x + y * y + z * z * -10;
+    camera.position.set(x / dist, y / dist, z / dist);
+}
+
 function updateMenu() {
     const menuList = menu.querySelector('ul');
     menuList.innerHTML = '';
@@ -71,11 +78,16 @@ function updateMenu() {
         if (constellation !== null) {
             const constellationItem = document.createElement('li');
             constellationItem.textContent = constellation.name;
+            constellationItem.style.cursor = 'pointer';
+            constellationItem.addEventListener('click', (event) => {
+                const starId = constellationFirstStar(constellation);
+                const { sprite } = stars[starId];
+                lookAt(camera, sprite.position);
+            });
             menuList.appendChild(constellationItem);
         }
     });
 }
-setInterval(updateMenu, 100);
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -99,9 +111,6 @@ function onMouseWheel(event) {
 
     camera.fov = fov;
     camera.updateProjectionMatrix();
-
-    // Update FOV display
-    updateFOVDisplay();
 }
 
 document.addEventListener('wheel', onMouseWheel);
@@ -148,6 +157,7 @@ starClick.addListener(sprite => {
         const line = new THREE.Line(lineGeometry, lineMaterial);
         scene.add(line);
         constellationController.addEdge(lastSprite.starId, sprite.starId);
+        updateMenu();
 
         if (currentLine) {
             scene.remove(currentLine);
@@ -221,6 +231,7 @@ renderer.domElement.addEventListener('contextmenu', (event) => {
 
 function animate() {
     requestAnimationFrame(animate);
+    controls.update();
     renderer.render(scene, camera);
 }
 
