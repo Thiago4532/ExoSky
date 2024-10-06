@@ -1,11 +1,11 @@
 export const sampleStars = [
-    {
-        name: "Vega",
-        distance: 7.68,
-        magnitude: 0.582,
-        ra: '18h 36m 56.33635s',
-        dec: '+38° 47′ 01.2802″'
-    },
+    // {
+    //     name: "Vega",
+    //     distance: 7.68,
+    //     magnitude: 0.582,
+    //     ra: '18h 36m 56.33635s',
+    //     dec: '+38° 47′ 01.2802″'
+    // },
     {
         name: "Acrux",
         distance: 99,

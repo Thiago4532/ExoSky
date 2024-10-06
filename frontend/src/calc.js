@@ -25,20 +25,35 @@ export const decToDeg = (decString) => {
     const minutes = parseFloat(parts[1]);
     const seconds = parseFloat(parts[2]);
 
-    const decimalDegrees = degrees + (minutes / 60) + (seconds / 3600);
-    
+    console.log(parts, degrees, minutes, seconds)
+
+    const decimalDegrees = degrees + (minutes / 60) + (seconds / 3600); 
     return decimalDegrees;
+}
+
+export const PC_TO_KM = 3.08567758149137e13;
+export const PC_TO_M = PC_TO_KM * 1000.0;
+export const M_TO_U = 1e-9;
+
+// Absolute magnitude to size
+export function magnitudeToSize(absmag) {
+    let pseudo_l = Math.pow(10, -0.4 * absmag);
+
+    let size_fac = 1;
+
+    // TODO: Maximum size
+    let size = Math.pow(pseudo_l, 0.4) * size_fac;
+
+    return size;
 }
 
 export const sphericalToCartesian = (rightAscension, declination, distance) => {
     const raRad = rightAscension * (Math.PI / 180);
     const decRad = declination * (Math.PI / 180);
 
-    const mult = 10;
-
-    const x = distance * Math.cos(decRad) * Math.cos(raRad) * mult;
-    const y = distance * Math.cos(decRad) * Math.sin(raRad) * mult;
-    const z = distance * Math.sin(decRad) * mult;
+    const x = distance * Math.cos(raRad) * Math.cos(decRad);
+    const y = distance * Math.sin(raRad) * Math.cos(decRad);
+    const z = distance * Math.sin(decRad);
 
     return { x, y, z };
 }
