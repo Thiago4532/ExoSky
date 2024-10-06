@@ -6,6 +6,7 @@ import { StarClick } from './star-click';
 import { planetsURL } from './planets';
 import { brightStarsData } from '../data/bright-stars';
 import { Star } from './star';
+import { Constellation } from './constellation';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
@@ -50,6 +51,10 @@ fetch(planetsURL.earth)
         console.error('Error loading stars:', error);
         loadingDisplay.textContent = 'Error loading stars';
     });
+
+
+const constellations = [];
+constellations.push(new Constellation());
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -121,6 +126,7 @@ starClick.addListener(sprite => {
         const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
         const line = new THREE.Line(lineGeometry, lineMaterial);
         scene.add(line);
+        constellations[0].addEdge(lastSprite.starId, sprite.starId);
 
         if (currentLine) {
             scene.remove(currentLine);
