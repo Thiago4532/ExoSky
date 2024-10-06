@@ -2,11 +2,14 @@ import './style.css';
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import { StarClick } from './star-click';
 import { planetsURL } from './planets';
 import { Star } from './star';
 import { ConstellationController } from './constellation-controller';
 import { ConstellationsMenu } from './constellations-menu'
+import { constellationFirstStar } from './constellation-service'
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
@@ -80,6 +83,27 @@ function onMouseWheel(event) {
     camera.fov = fov;
     camera.updateProjectionMatrix();
 }
+
+// Function to get 2D position
+function get2DPosition(object) {
+    const vector = new THREE.Vector3();
+    const widthHalf = 0.5 * renderer.domElement.width;  // Half width of the canvas
+    const heightHalf = 0.5 * renderer.domElement.height; // Half height of the canvas
+
+    object.updateWorldMatrix(true, true); // Update world matrix for accurate calculations
+    vector.setFromMatrixPosition(object.matrixWorld); // Get the object's world position
+    vector.project(camera); // Project the vector to 2D space
+
+    // Calculate 2D screen coordinates
+    vector.x = (vector.x * widthHalf) + widthHalf;
+    vector.y = -(vector.y * heightHalf) + heightHalf; // Flip Y
+
+    return {
+        x: vector.x,
+        y: vector.y
+    };
+}
+
 
 document.addEventListener('wheel', onMouseWheel);
 
@@ -197,14 +221,6 @@ renderer.domElement.addEventListener('contextmenu', (event) => {
     }
 });
 
-function animate() {
-    requestAnimationFrame(animate);
-    controls.update();
-    renderer.render(scene, camera);
-}
-
-animate();
-
 // Create a control box in the top-right corner
 const controlBox = document.createElement('div');
 controlBox.id = 'control-box';
@@ -219,3 +235,31 @@ controlBox.innerHTML = `
     <p>Use these controls to interact with the star map.</p>
 `;
 document.body.appendChild(controlBox);
+
+const constellationNamesDiv = document.createElement('div');
+constellationNamesDiv.id = 'constellation-names-div';
+document.body.appendChild(constellationNamesDiv);
+
+const animateConstellationNames = () => {
+    if (constellationController === null) return;
+    constellationNamesDiv.innerHTML = '';
+    for (let constellation of constellationController.constellations) {
+        if (constellation === null) continue;
+        const starId = constellationFirstStar(constellation);
+        const winPos = get2DPosition(stars[starId].sprite);
+        const textBox = document.createElement('p');
+        textBox.innerHTML = constellation.name;
+        textBox.style.left = winPos.x + 'px';
+        textBox.style.top = winPos.y + 'px';
+        constellationNamesDiv.appendChild(textBox);
+    }
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    animateConstellationNames();
+    renderer.render(scene, camera);
+}
+
+animate();

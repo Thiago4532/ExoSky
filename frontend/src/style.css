@@ -47,6 +47,11 @@ body {
     margin-top: 10px;
 }
 
+#constellation-names-div p {
+    position: absolute;
+    color: white;
+}
+
 #menu-button {
     position: absolute;
     top: 10px;
