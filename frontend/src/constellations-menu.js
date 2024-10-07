@@ -9,7 +9,7 @@ export class ConstellationsMenu {
 
         const menuButton = document.createElement('button');
         menuButton.id = 'menu-button';
-        menuButton.innerHTML = 'Constellations';
+        menuButton.innerHTML = 'Toggle constellations menu';
         document.body.appendChild(menuButton);
 
         this.el = document.createElement('div');
@@ -30,8 +30,10 @@ export class ConstellationsMenu {
     update() {
         const listEl = this.el.querySelector('ul');
         listEl.innerHTML = '';
+        let found = false;
         this.constellationController.constellations.forEach((constellation) => {
             if (constellation !== null) {
+                found = true;
                 const liEl = document.createElement('li');
 
                 const inputEl = document.createElement('input');
@@ -57,5 +59,10 @@ export class ConstellationsMenu {
                 listEl.appendChild(liEl);
             }
         });
+        if (!found) {
+            const liEl = document.createElement('li');
+            liEl.innerHTML = 'No constellations yet';
+            listEl.appendChild(liEl);
+        }
     }
 }
