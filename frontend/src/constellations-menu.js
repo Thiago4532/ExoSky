@@ -24,6 +24,7 @@ export class ConstellationsMenu {
         menuButton.addEventListener('click', () => {
             this.el.classList.toggle('show');
         });
+        menuButton.click();
     }
 
     update() {
