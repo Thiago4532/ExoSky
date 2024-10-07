@@ -63,7 +63,13 @@ const planetJSON = `${planetName}.json`;
 const planetURL = 
     `https://raw.githubusercontent.com/Thiago4532/teste-teste-teste/refs/heads/main/${planetJSON}`;
 
-// TODO: Error handling
+const allEdges = [];
+
+let currentLine = null;
+const lineColor = 0xd8cfff;
+const mouse = new THREE.Vector2(); // Store 2D mouse position
+const raycaster = new THREE.Raycaster(); // Raycaster to project 2D mouse into 3D space
+
 fetch(planetURL)
     .then(response => {
         return response.json();
@@ -74,6 +80,35 @@ fetch(planetURL)
         loadingDisplay.style.display = 'none';
         constellationController = new ConstellationController(stars.length);
         constellationsMenu = new ConstellationsMenu(constellationController, stars, camera);
+
+        const edgesParam = getQueryParam('edges');
+        if (edgesParam) {
+            const edges = edgesParam.split(';');
+            edges.forEach(edge => {
+                const [u, v] = edge.split(',').map(x => parseInt(x));
+                constellationController.addEdge(u, v);
+                allEdges.push({ u, v });
+
+                const lineMaterial = new THREE.LineBasicMaterial({ color: lineColor });
+                const points = [
+                    new THREE.Vector3(stars[u].sprite.position.x, stars[u].sprite.position.y, stars[u].sprite.position.z),
+                    new THREE.Vector3(stars[v].sprite.position.x, stars[v].sprite.position.y, stars[v].sprite.position.z)
+                ];
+                const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+                const line = new THREE.Line(lineGeometry, lineMaterial);
+                scene.add(line);
+            });
+        }
+
+        const namesParam = getQueryParam('names');
+        if (namesParam) {
+            const constellationNames = namesParam.split(';');
+            constellationNames.forEach((name, index) => {
+                if (!constellationController.constellations[index]) return;
+                constellationController.constellations[index].name = name;
+            });
+        }
+        constellationsMenu.update();
     })
     .catch(error => {
         console.error('Error loading stars:', error);
@@ -157,15 +192,8 @@ document.addEventListener('keydown', handleKeyPress);
 
 const starClick = new StarClick(renderer.domElement, camera, scene);
 
-let currentLine = null;
-const lineColor = 0xd8cfff;
-const mouse = new THREE.Vector2(); // Store 2D mouse position
-const raycaster = new THREE.Raycaster(); // Raycaster to project 2D mouse into 3D space
-
 starClick.addListener(sprite => { 
     if (lastSprite !== null) {
-        lastSprite.material.color.set(stars[sprite.starId].color);
-
         const lineMaterial = new THREE.LineBasicMaterial({ color: lineColor });
         const points = [
             new THREE.Vector3(lastSprite.position.x, lastSprite.position.y, lastSprite.position.z),
@@ -175,6 +203,8 @@ starClick.addListener(sprite => {
         const line = new THREE.Line(lineGeometry, lineMaterial);
         scene.add(line);
         constellationController.addEdge(lastSprite.starId, sprite.starId);
+        allEdges.push({ u: lastSprite.starId, v: sprite.starId });
+
         constellationsMenu.update();
 
         if (currentLine) {
@@ -182,7 +212,6 @@ starClick.addListener(sprite => {
             currentLine = null;
         }
     }
-    sprite.material.color.set(0x00ff00);
     lastSprite = sprite;
 });
 
@@ -253,10 +282,10 @@ controlBox.id = 'control-box';
 controlBox.innerHTML = `
     <h3>Controls</h3>
     <ul>
-        <li>Zoom: Scroll mouse wheel</li>
-        <li>Change FOV: Use mouse wheel</li>
-        <li>Draw Line: Click two stars</li>
-        <li>Cancel Line: Right-click</li>
+        <li>Scroll: Zoom in/out</li>
+        <li>Click and drag: Rotate camera</li>
+        <li>Left-click on star: Connect stars</li>
+        <li>Right-click: Cancel connection</li>
     </ul>
     <p>Use these controls to interact with the star map.</p>
 `;
@@ -266,21 +295,65 @@ const constellationNamesDiv = document.createElement('div');
 constellationNamesDiv.id = 'constellation-names-div';
 document.body.appendChild(constellationNamesDiv);
 
+function isSpriteInFrontOfCamera(sprite) {
+    const cameraDirection = new THREE.Vector3();
+    camera.getWorldDirection(cameraDirection); // Get the camera's forward direction
+
+    const spritePosition = sprite.position.clone();
+    const cameraToSprite = spritePosition.sub(camera.position); // Vector from the camera to the sprite
+
+    const dot = cameraToSprite.dot(cameraDirection); // Dot product
+
+    return dot > 0; // Returns true if the sprite is in front of the camera, false if behind
+}
+
 const animateConstellationNames = () => {
     if (constellationController === null) return;
     constellationNamesDiv.innerHTML = '';
     for (let constellation of constellationController.constellations) {
         if (constellation === null) continue;
         const starId = constellationFirstStar(constellation);
-        const winPos = get2DPosition(stars[starId].sprite);
-        const textBox = document.createElement('p');
-        textBox.innerHTML = constellation.name;
-        textBox.style.left = winPos.x + 'px';
-        textBox.style.top = winPos.y + 'px';
-        constellationNamesDiv.appendChild(textBox);
+        if (isSpriteInFrontOfCamera(stars[starId].sprite)) {
+            const winPos = get2DPosition(stars[starId].sprite);
+            const textBox = document.createElement('p');
+            textBox.innerHTML = constellation.name;
+            textBox.style.left = winPos.x + 'px';
+            textBox.style.top = winPos.y + 'px';
+            constellationNamesDiv.appendChild(textBox);
+        }
     }
 }
 
+// Add a copy to clipboard button, which creates a URL with the current planet
+// and current edges and constellation names, binary and base64
+
+const copyButton = document.createElement('button');
+copyButton.id = 'copy-button';
+copyButton.textContent = 'Export to clipboard';
+document.body.appendChild(copyButton);
+
+copyButton.addEventListener('click', () => {
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set('planet', planetName);
+
+    const edgesParam = allEdges.map(edge => `${edge.u},${edge.v}`).join(';');
+    currentUrl.searchParams.set('edges', edgesParam);
+
+    const constellationNames = constellationController.constellations
+        .filter(c => c !== null)
+        .map(c => c.name)
+        .join(';');
+    console.log('Constellation names:', constellationNames);
+    currentUrl.searchParams.set('names', constellationNames);
+
+    navigator.clipboard.writeText(currentUrl.toString())
+        .then(() => {
+            alert('URL copied to clipboard!');
+        })
+        .catch(err => {
+            console.error('Failed to copy URL: ', err);
+        });
+});
 
 function animate() {
     requestAnimationFrame(animate);
