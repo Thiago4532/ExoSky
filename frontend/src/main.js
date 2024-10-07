@@ -5,7 +5,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import { StarClick } from './star-click';
-import { planetsURL } from './planets';
+import { planetSet, planetList } from './planets';
 import { Star } from './star';
 import { ConstellationController } from './constellation-controller';
 import { ConstellationsMenu } from './constellations-menu'
@@ -43,8 +43,28 @@ document.body.appendChild(loadingDisplay);
 let constellationController = null;
 let constellationsMenu = null;
 
+function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+}
+
+function getRandomPlanet() {
+    return planetList[Math.floor(Math.random() * planetList.length)];
+}
+
+// Get the planet name from the query parameter
+const planetName_ = getQueryParam('planet');
+
+// Check if the planet exists in planetsURL, else default to Earth
+const planetName = (planetSet[planetName_]) ? planetName_ : getRandomPlanet();
+
+// Load the stars from the specified planet
+const planetJSON = `${planetName}.json`;
+const planetURL = 
+    `https://raw.githubusercontent.com/Thiago4532/teste-teste-teste/refs/heads/main/${planetJSON}`;
+
 // TODO: Error handling
-fetch(planetsURL.earth)
+fetch(planetURL)
     .then(response => {
         return response.json();
     })
@@ -59,6 +79,12 @@ fetch(planetsURL.earth)
         console.error('Error loading stars:', error);
         loadingDisplay.textContent = 'Error loading stars';
     });
+
+// Planet name
+const planetNameDiv = document.createElement('div');
+planetNameDiv.id = 'planet-name';
+planetNameDiv.textContent = `Planet: ${planetName}`;
+document.body.appendChild(planetNameDiv);
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -254,6 +280,7 @@ const animateConstellationNames = () => {
         constellationNamesDiv.appendChild(textBox);
     }
 }
+
 
 function animate() {
     requestAnimationFrame(animate);
