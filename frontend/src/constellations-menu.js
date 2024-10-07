@@ -31,15 +31,29 @@ export class ConstellationsMenu {
         listEl.innerHTML = '';
         this.constellationController.constellations.forEach((constellation) => {
             if (constellation !== null) {
-                const constellationItem = document.createElement('li');
-                constellationItem.textContent = constellation.name;
-                constellationItem.style.cursor = 'pointer';
-                constellationItem.addEventListener('click', (event) => {
+                const liEl = document.createElement('li');
+
+                const inputEl = document.createElement('input');
+                inputEl.id = 'constellation-input';
+                inputEl.type = 'text';
+                inputEl.value = constellation.name;
+                inputEl.addEventListener('input', (event) => {
+                    constellation.name = inputEl.value;
+                });
+                liEl.appendChild(inputEl);
+
+                const buttonEl = document.createElement('button');
+                buttonEl.id = 'constellation-go-button';
+                buttonEl.type = 'button';
+                buttonEl.textContent = 'Go';
+                buttonEl.addEventListener('click', (event) => {
                     const starId = constellationFirstStar(constellation);
                     const { sprite } = this.stars[starId];
                     lookAt(this.camera, sprite.position);
                 });
-                listEl.appendChild(constellationItem);
+                liEl.appendChild(buttonEl);
+
+                listEl.appendChild(liEl);
             }
         });
     }
