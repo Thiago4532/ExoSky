@@ -45,7 +45,7 @@ export class ConstellationsMenu {
                 const buttonEl = document.createElement('button');
                 buttonEl.id = 'constellation-go-button';
                 buttonEl.type = 'button';
-                buttonEl.textContent = 'Go';
+                buttonEl.textContent = 'Look';
                 buttonEl.addEventListener('click', (event) => {
                     const starId = constellationFirstStar(constellation);
                     const { sprite } = this.stars[starId];
