@@ -403,5 +403,7 @@ planetDropdown.addEventListener('change', () => {
     // Redirect to the new planet's URL
     const currentUrl = new URL(window.location.href);
     currentUrl.searchParams.set('planet', selectedPlanet);
+    currentUrl.searchParams.delete('edges');
+    currentUrl.searchParams.delete('names');
     window.location.href = currentUrl.toString();
 });
