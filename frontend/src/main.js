@@ -2,8 +2,6 @@ import './style.css';
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { FontLoader } from 'three/addons/loaders/FontLoader.js';
-import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import { StarClick } from './star-click';
 import { planetSet, planetList } from './planets';
 import { Star } from './star';
@@ -276,7 +274,6 @@ renderer.domElement.addEventListener('contextmenu', (event) => {
     }
 });
 
-// Create a control box in the top-right corner
 const controlBox = document.createElement('div');
 controlBox.id = 'control-box';
 controlBox.innerHTML = `
@@ -297,14 +294,14 @@ document.body.appendChild(constellationNamesDiv);
 
 function isSpriteInFrontOfCamera(sprite) {
     const cameraDirection = new THREE.Vector3();
-    camera.getWorldDirection(cameraDirection); // Get the camera's forward direction
+    camera.getWorldDirection(cameraDirection);
 
     const spritePosition = sprite.position.clone();
-    const cameraToSprite = spritePosition.sub(camera.position); // Vector from the camera to the sprite
+    const cameraToSprite = spritePosition.sub(camera.position);
 
-    const dot = cameraToSprite.dot(cameraDirection); // Dot product
+    const dot = cameraToSprite.dot(cameraDirection);
 
-    return dot > 0; // Returns true if the sprite is in front of the camera, false if behind
+    return dot > 0;
 }
 
 const animateConstellationNames = () => {
@@ -323,9 +320,6 @@ const animateConstellationNames = () => {
         }
     }
 }
-
-// Add a copy to clipboard button, which creates a URL with the current planet
-// and current edges and constellation names, binary and base64
 
 const copyButton = document.createElement('button');
 copyButton.id = 'copy-button';
@@ -363,3 +357,51 @@ function animate() {
 }
 
 animate();
+
+// Create a button and a dropdown list for planet selection
+const travelButton = document.createElement('button');
+travelButton.id = 'travel-button';
+travelButton.textContent = 'Travel to another planet';
+document.body.appendChild(travelButton);
+
+const planetDropdown = document.createElement('select');
+planetDropdown.id = 'planet-dropdown';
+planetDropdown.style.display = 'none';
+document.body.appendChild(planetDropdown);
+
+const defaultOption = document.createElement('option');
+defaultOption.value = '';
+defaultOption.textContent = 'Select your planet';
+defaultOption.hidden = true;
+defaultOption.selected = true;
+planetDropdown.appendChild(defaultOption);
+
+const randomOption = document.createElement('option');
+randomOption.value = 'random';
+randomOption.textContent = 'Random Planet';
+planetDropdown.appendChild(randomOption);
+
+
+planetList.forEach(planet => {
+    const option = document.createElement('option');
+    option.value = planet;
+    option.textContent = planet;
+    planetDropdown.appendChild(option);
+});
+
+travelButton.addEventListener('click', () => {
+    planetDropdown.style.display = (planetDropdown.style.display === 'none') ? 'block' : 'none';
+});
+
+planetDropdown.addEventListener('change', () => {
+    let selectedPlanet = planetDropdown.value;
+    
+    if (selectedPlanet === 'random') {
+        selectedPlanet = getRandomPlanet();
+    }
+
+    // Redirect to the new planet's URL
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set('planet', selectedPlanet);
+    window.location.href = currentUrl.toString();
+});

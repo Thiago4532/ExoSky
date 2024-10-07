@@ -98,9 +98,18 @@ body {
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
+/* #menu ul {
+    list-style-type: none;
+    padding: 0;
+} */
+
+#menu ul li {
+    margin: 10px 0;
+}
+
 #copy-button {
     position: absolute;
-    bottom: 10px;
+    bottom: 60px;
     right: 10px;
     padding: 10px;
     font-size: 16px;
@@ -110,11 +119,30 @@ body {
     cursor: pointer;
 }
 
-/* #menu ul {
-    list-style-type: none;
-    padding: 0;
-} */
-
-#menu ul li {
-    margin: 10px 0;
+#travel-button {
+    position: absolute;
+    bottom: 10px; /* Position above the copy/export button */
+    right: 10px;
+    padding: 10px;
+    font-size: 16px;
+    background-color: #333;
+    color: white;
+    border: none;
+    cursor: pointer;
 }
+
+#planet-dropdown {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+    padding: 10px;
+    background-color: #333;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: none; /* Initially hidden */
+    z-index: 1000; /* Ensure it's above other elements */
+}
+
