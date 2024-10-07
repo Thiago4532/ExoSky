@@ -59,7 +59,7 @@ const planetName = (planetSet[planetName_]) ? planetName_ : getRandomPlanet();
 // Load the stars from the specified planet
 const planetJSON = `${planetName}.json`;
 const planetURL = 
-    `https://raw.githubusercontent.com/Thiago4532/teste-teste-teste/refs/heads/main/${planetJSON}`;
+    `https://raw.githubusercontent.com/Thiago4532/deepsky-planets-data/refs/heads/main/${planetJSON}`;
 
 const allEdges = [];
 
